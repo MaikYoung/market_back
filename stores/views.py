@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from stores.models import Store
-from stores.serializers import StoreListSerializer, StoreDetailSerializer
+from stores.serializers import StoreListSerializer, StoreDetailSerializer, StoreCustomSerializer
 
 
 class StoreListView(ListAPIView):
@@ -23,5 +23,20 @@ class StoreDetailView(RetrieveUpdateDestroyAPIView):
         store = self.get_object()
         serializer = StoreDetailSerializer(store)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if instance.manager.id != self.request.user.id:
+            serializer = StoreCustomSerializer(instance, data=request.data, partial=partial)
+            try:
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
 

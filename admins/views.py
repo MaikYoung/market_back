@@ -16,9 +16,9 @@ class AdminDetail(RetrieveUpdateDestroyAPIView):
     """
 
     def retrieve(self, request, *args, **kwargs):
-        object = self.get_object()
-        if object.id == self.request.user.id:
-            serializer = AdminSerializer(object)
+        admin = self.get_object()
+        if admin.id == self.request.user.id:
+            serializer = AdminSerializer(admin)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
